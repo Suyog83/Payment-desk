@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Recharge - PaymentDesk</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .payment-form {
+            max-width: 600px;
+            margin: 120px auto 40px;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .plans-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .plan-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .plan-card:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+        }
+
+        .plan-card.selected {
+            border-color: #3498db;
+            background-color: #f7fbfe;
+        }
+
+        .plan-card h4 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-card .validity {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .plan-card .data {
+            color: #27ae60;
+            font-weight: 500;
+            margin: 0.5rem 0;
+        }
+
+        .bill-summary {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1.5rem 0;
+        }
+
+        .bill-summary h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .pay-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .pay-button:hover {
+            background-color: #2980b9;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+            display: none;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .payment-form {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .form-group {
+            animation: slideIn 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+
+        .plan-card {
+            animation: scaleIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .plan-card:nth-child(1) { animation-delay: 0.1s; }
+        .plan-card:nth-child(2) { animation-delay: 0.2s; }
+        .plan-card:nth-child(3) { animation-delay: 0.3s; }
+        .plan-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .plan-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .bill-summary {
+            animation: fadeInUp 0.8s ease-out 0.5s both;
+        }
+
+        .pay-button {
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        .pay-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <h1>PaymentDesk</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <div class="user-menu" id="userMenu">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="payment-form">
+            <h2><i class="fas fa-mobile-alt"></i> Mobile Recharge</h2>
+            
+            <div class="bill-summary" style="margin-bottom: 1.5rem; background: #e8f4f8;">
+                <h3 style="margin-bottom: 0.8rem; color: #2c3e50;"><i class="fas fa-user"></i> Your Details</h3>
+                <div class="summary-item" id="userDetailsDisplay">
+                    <span>Loading...</span>
+                </div>
+            </div>
+
+            <form id="rechargeForm" onsubmit="return validateForm(event)">
+                <div class="form-group">
+                    <label for="operator">Mobile Operator</label>
+                    <select id="operator" name="operator" required>
+                        <option value="">Select Operator</option>
+                        <option value="airtel">Airtel</option>
+                        <option value="jio">Jio</option>
+                        <option value="vi">Vi</option>
+                        <option value="bsnl">BSNL</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobile">Mobile Number</label>
+                    <input type="tel" id="mobile" name="mobile" pattern="[0-9]{10}" required>
+                    <div class="error-message" id="mobile-error">Please enter a valid 10-digit mobile number</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Recharge Plan</label>
+                    <div class="plans-container">
+                        <div class="plan-card" data-amount="199">
+                            <h4>₹199</h4>
+                            <div class="validity">Validity: 28 Days</div>
+                            <div class="data">1.5GB/Day</div>
+                            <div>Unlimited Calls</div>
+                        </div>
+                        <div class="plan-card" data-amount="299">
+                            <h4>₹299</h4>
+                            <div class="validity">Validity: 28 Days</div>
+                            <div class="data">2GB/Day</div>
+                            <div>Unlimited Calls</div>
+                        </div>
+                        <div class="plan-card" data-amount="499">
+                            <h4>₹499</h4>
+                            <div class="validity">Validity: 56 Days</div>
+                            <div class="data">2GB/Day</div>
+                            <div>Unlimited Calls</div>
+                        </div>
+                        <div class="plan-card" data-amount="699">
+                            <h4>₹699</h4>
+                            <div class="validity">Validity: 84 Days</div>
+                            <div class="data">2GB/Day</div>
+                            <div>Unlimited Calls</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="selected-plan" name="selected-plan" required>
+                    <div class="error-message" id="plan-error">Please select a recharge plan</div>
+                </div>
+
+                <div class="bill-summary">
+                    <h3>Recharge Summary</h3>
+                    <div class="summary-item">
+                        <span>Plan Amount</span>
+                        <span id="summary-amount">₹0.00</span>
+                    </div>
+                    <div class="summary-item" style="font-weight: bold;">
+                        <span>Total Amount</span>
+                        <span id="total-amount">₹0.00</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="pay-button">
+                    Proceed to Pay
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        // Plan selection
+        const planCards = document.querySelectorAll('.plan-card');
+        const selectedPlanInput = document.getElementById('selected-plan');
+
+        planCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove selected class from all cards
+                planCards.forEach(c => c.classList.remove('selected'));
+                // Add selected class to clicked card
+                this.classList.add('selected');
+                // Update hidden input
+                selectedPlanInput.value = this.dataset.amount;
+                // Update summary
+                updateSummary(parseFloat(this.dataset.amount));
+            });
+        });
+
+        function updateSummary(amount) {
+            document.getElementById('summary-amount').textContent = `₹${amount.toFixed(2)}`;
+            document.getElementById('total-amount').textContent = `₹${amount.toFixed(2)}`;
+        }
+
+        // Form validation
+        function validateForm(event) {
+            event.preventDefault();
+            let isValid = true;
+
+            // Mobile number validation
+            const mobile = document.getElementById('mobile').value;
+            if (!/^[0-9]{10}$/.test(mobile)) {
+                document.getElementById('mobile-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('mobile-error').style.display = 'none';
+            }
+
+            // Plan selection validation
+            if (!selectedPlanInput.value) {
+                document.getElementById('plan-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('plan-error').style.display = 'none';
+            }
+
+            if (isValid) {
+                // Prepare payment data
+                const amount = parseFloat(selectedPlanInput.value);
+                const paymentData = {
+                    service: 'Mobile Recharge',
+                    operator: document.getElementById('operator').value,
+                    mobile: document.getElementById('mobile').value,
+                    planAmount: amount.toFixed(2),
+                    totalAmount: amount.toFixed(2)
+                };
+
+                // Store payment data in sessionStorage
+                sessionStorage.setItem('paymentData', JSON.stringify(paymentData));
+
+                // Redirect to payment page
+                window.location.href = 'payment.html';
+            }
+
+            return false;
+        }
+
+        // Check authentication on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Display user info and logout button
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const userMenu = document.getElementById('userMenu');
+            userMenu.innerHTML = `
+                <span class="user-info"><i class="fas fa-user"></i> ${currentUser.name || currentUser.email || 'User'}</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            `;
+
+            // Auto-fill user details
+            autoFillUserDetails();
+        });
+
+        function autoFillUserDetails() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const user = users.find(u => u.email === currentUser.email) || currentUser;
+            
+            // Display user details
+            const userDetailsDiv = document.getElementById('userDetailsDisplay');
+            userDetailsDiv.innerHTML = `
+                <div style="display: grid; gap: 0.5rem;">
+                    <div><strong>Name:</strong> ${user.name || 'N/A'}</div>
+                    <div><strong>Email:</strong> ${user.email || 'N/A'}</div>
+                    <div><strong>Phone:</strong> ${user.phone || 'N/A'}</div>
+                </div>
+            `;
+            
+            // Auto-fill mobile number if available
+            if (user.phone) {
+                document.getElementById('mobile').value = user.phone;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html> 

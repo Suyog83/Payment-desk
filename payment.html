@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - PaymentDesk</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .payment-container {
+            max-width: 800px;
+            margin: 100px auto 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .payment-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .payment-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .payment-content {
+            padding: 2rem;
+        }
+
+        .payment-methods {
+            margin-bottom: 2rem;
+        }
+
+        .payment-methods h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .method-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .method-card:hover {
+            border-color: #3498db;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .method-card.selected {
+            border-color: #3498db;
+            background: #f0f8ff;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .method-card i {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 0.5rem;
+        }
+
+        .method-card span {
+            display: block;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .payment-details {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .payment-details h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .payment-form {
+            display: none;
+        }
+
+        .payment-form.active {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .pay-now-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .pay-now-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .pay-now-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .back-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        .upi-id-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .upi-id-input input {
+            flex: 1;
+        }
+
+        .verify-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .verify-btn:hover {
+            background: #229954;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <h1>PaymentDesk</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#services">Services</a></li>
+            </ul>
+            <div class="user-menu" id="userMenu"></div>
+        </nav>
+    </header>
+
+    <div class="payment-container">
+        <div class="payment-header">
+            <h2><i class="fas fa-credit-card"></i> Complete Payment</h2>
+        </div>
+
+        <div class="payment-content">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+
+            <div class="payment-details" id="paymentDetails">
+                <!-- Will be populated by JavaScript -->
+            </div>
+
+            <div class="payment-methods">
+                <h3>Select Payment Method</h3>
+                <div class="method-grid">
+                    <div class="method-card" data-method="card" onclick="selectPaymentMethod('card')">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Credit/Debit Card</span>
+                    </div>
+                    <div class="method-card" data-method="upi" onclick="selectPaymentMethod('upi')">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>UPI</span>
+                    </div>
+                    <div class="method-card" data-method="netbanking" onclick="selectPaymentMethod('netbanking')">
+                        <i class="fas fa-university"></i>
+                        <span>Net Banking</span>
+                    </div>
+                    <div class="method-card" data-method="wallet" onclick="selectPaymentMethod('wallet')">
+                        <i class="fas fa-wallet"></i>
+                        <span>Wallet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credit/Debit Card Form -->
+            <div class="payment-form" id="cardForm">
+                <h3>Card Details</h3>
+                <div class="form-group">
+                    <label>Card Number</label>
+                    <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Expiry Date</label>
+                        <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
+                    </div>
+                    <div class="form-group">
+                        <label>CVV</label>
+                        <input type="text" id="cvv" placeholder="123" maxlength="3">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Cardholder Name</label>
+                    <input type="text" id="cardName" placeholder="John Doe">
+                </div>
+            </div>
+
+            <!-- UPI Form -->
+            <div class="payment-form" id="upiForm">
+                <h3>UPI Details</h3>
+                <div class="form-group">
+                    <label>UPI ID</label>
+                    <div class="upi-id-input">
+                        <input type="text" id="upiId" placeholder="yourname@paytm">
+                        <button class="verify-btn" onclick="verifyUPI()">Verify</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Net Banking Form -->
+            <div class="payment-form" id="netbankingForm">
+                <h3>Net Banking</h3>
+                <div class="form-group">
+                    <label>Select Bank</label>
+                    <select id="bankSelect" style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                        <option value="">Select Bank</option>
+                        <option value="sbi">State Bank of India</option>
+                        <option value="hdfc">HDFC Bank</option>
+                        <option value="icici">ICICI Bank</option>
+                        <option value="axis">Axis Bank</option>
+                        <option value="pnb">Punjab National Bank</option>
+                        <option value="bob">Bank of Baroda</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Wallet Form -->
+            <div class="payment-form" id="walletForm">
+                <h3>Wallet</h3>
+                <div class="form-group">
+                    <label>Select Wallet</label>
+                    <select id="walletSelect" style="width: 100%; padding: 0.9rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+                        <option value="">Select Wallet</option>
+                        <option value="paytm">Paytm</option>
+                        <option value="phonepe">PhonePe</option>
+                        <option value="gpay">Google Pay</option>
+                        <option value="amazonpay">Amazon Pay</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="walletMobile" placeholder="10-digit mobile number" maxlength="10">
+                </div>
+            </div>
+
+            <button class="pay-now-btn" id="payNowBtn" onclick="processPayment()" disabled>
+                <i class="fas fa-lock"></i> Pay Now
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedMethod = null;
+        let paymentData = {};
+
+        // Load payment data from sessionStorage
+        window.addEventListener('DOMContentLoaded', function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Display user info
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const userMenu = document.getElementById('userMenu');
+            userMenu.innerHTML = `
+                <span class="user-info"><i class="fas fa-user"></i> ${currentUser.name || currentUser.email || 'User'}</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            `;
+
+            // Load payment data
+            const storedData = sessionStorage.getItem('paymentData');
+            if (storedData) {
+                paymentData = JSON.parse(storedData);
+                displayPaymentDetails();
+            } else {
+                alert('No payment data found. Redirecting to home...');
+                window.location.href = 'index.html';
+            }
+
+            // Format card number input
+            document.getElementById('cardNumber')?.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s/g, '');
+                let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formatted;
+            });
+
+            // Format expiry date input
+            document.getElementById('expiryDate')?.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                e.target.value = value;
+            });
+        });
+
+        function displayPaymentDetails() {
+            const detailsDiv = document.getElementById('paymentDetails');
+            detailsDiv.innerHTML = `
+                <h3>Payment Summary</h3>
+                <div class="detail-row">
+                    <span>Service:</span>
+                    <span>${paymentData.service || 'N/A'}</span>
+                </div>
+                ${paymentData.provider ? `<div class="detail-row">
+                    <span>Provider:</span>
+                    <span>${paymentData.provider}</span>
+                </div>` : ''}
+                ${paymentData.consumerNumber ? `<div class="detail-row">
+                    <span>Consumer Number:</span>
+                    <span>${paymentData.consumerNumber}</span>
+                </div>` : ''}
+                ${paymentData.billNumber ? `<div class="detail-row">
+                    <span>Bill Number:</span>
+                    <span>${paymentData.billNumber}</span>
+                </div>` : ''}
+                ${paymentData.planAmount ? `<div class="detail-row">
+                    <span>Plan Amount:</span>
+                    <span>₹${paymentData.planAmount}</span>
+                </div>` : ''}
+                ${paymentData.convenienceFee ? `<div class="detail-row">
+                    <span>Convenience Fee:</span>
+                    <span>₹${paymentData.convenienceFee}</span>
+                </div>` : ''}
+                ${paymentData.processingFee ? `<div class="detail-row">
+                    <span>Processing Fee:</span>
+                    <span>₹${paymentData.processingFee}</span>
+                </div>` : ''}
+                ${paymentData.serviceCharge ? `<div class="detail-row">
+                    <span>Service Charge:</span>
+                    <span>₹${paymentData.serviceCharge}</span>
+                </div>` : ''}
+                <div class="detail-row">
+                    <span>Total Amount:</span>
+                    <span>₹${paymentData.totalAmount}</span>
+                </div>
+            `;
+        }
+
+        function selectPaymentMethod(method) {
+            selectedMethod = method;
+            
+            // Update UI
+            document.querySelectorAll('.method-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-method="${method}"]`).classList.add('selected');
+
+            // Show corresponding form
+            document.querySelectorAll('.payment-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(`${method}Form`).classList.add('active');
+
+            // Enable pay button
+            document.getElementById('payNowBtn').disabled = false;
+        }
+
+        function verifyUPI() {
+            const upiId = document.getElementById('upiId').value;
+            if (upiId && upiId.includes('@')) {
+                alert('UPI ID verified successfully!');
+            } else {
+                alert('Please enter a valid UPI ID (e.g., yourname@paytm)');
+            }
+        }
+
+        function processPayment() {
+            if (!selectedMethod) {
+                alert('Please select a payment method');
+                return;
+            }
+
+            const button = document.getElementById('payNowBtn');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            button.disabled = true;
+
+            // Simulate payment processing
+            setTimeout(() => {
+                // Store payment details for receipt
+                const receiptData = {
+                    ...paymentData,
+                    paymentMethod: selectedMethod,
+                    transactionId: 'TXN' + Date.now(),
+                    paymentDate: new Date().toLocaleString(),
+                    status: 'Success'
+                };
+                sessionStorage.setItem('receiptData', JSON.stringify(receiptData));
+                
+                // Redirect to receipt page
+                window.location.href = 'receipt.html';
+            }, 2000);
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
+

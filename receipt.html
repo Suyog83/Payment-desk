@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt - PaymentDesk</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .receipt-container {
+            max-width: 700px;
+            margin: 100px auto 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .receipt-header {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .receipt-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .receipt-content {
+            padding: 2rem;
+        }
+
+        .receipt-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .receipt-section:last-child {
+            border-bottom: none;
+        }
+
+        .receipt-section h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .receipt-section h3 i {
+            color: #3498db;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .total-row {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .transaction-id {
+            background: #e8f5e9;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .transaction-id .label {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .transaction-id .value {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+
+        .print-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .print-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        @media print {
+            .action-buttons {
+                display: none;
+            }
+            .receipt-container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <h1>PaymentDesk</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+            </ul>
+            <div class="user-menu" id="userMenu"></div>
+        </nav>
+    </header>
+
+    <div class="receipt-container">
+        <div class="receipt-header">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Payment Successful!</h2>
+            <p>Your transaction has been completed successfully</p>
+        </div>
+
+        <div class="receipt-content">
+            <div class="transaction-id">
+                <div class="label">Transaction ID</div>
+                <div class="value" id="transactionId"></div>
+            </div>
+
+            <div class="receipt-section">
+                <h3><i class="fas fa-user"></i> User Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value" id="userName"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value" id="userEmail"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phone:</span>
+                    <span class="detail-value" id="userPhone"></span>
+                </div>
+            </div>
+
+            <div class="receipt-section">
+                <h3><i class="fas fa-file-invoice"></i> Bill Details</h3>
+                <div id="billDetails">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="receipt-section">
+                <h3><i class="fas fa-credit-card"></i> Payment Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method:</span>
+                    <span class="detail-value" id="paymentMethod"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Date:</span>
+                    <span class="detail-value" id="paymentDate"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value" style="color: #27ae60;">Success</span>
+                </div>
+            </div>
+
+            <div class="receipt-section">
+                <h3><i class="fas fa-calculator"></i> Amount Summary</h3>
+                <div id="amountSummary">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                <div class="total-row">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Total Amount Paid:</span>
+                        <span id="totalAmount"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn print-btn" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+                <a href="index.html" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if (!isLoggedIn) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Display user info
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const userMenu = document.getElementById('userMenu');
+            userMenu.innerHTML = `
+                <span class="user-info"><i class="fas fa-user"></i> ${currentUser.name || currentUser.email || 'User'}</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            `;
+
+            // Load receipt data
+            const receiptData = JSON.parse(sessionStorage.getItem('receiptData') || '{}');
+            if (!receiptData.transactionId) {
+                alert('No receipt data found. Redirecting to home...');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            displayReceipt(receiptData);
+        });
+
+        function displayReceipt(data) {
+            // Transaction ID
+            document.getElementById('transactionId').textContent = data.transactionId;
+
+            // User Details
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const user = users.find(u => u.email === currentUser.email) || currentUser;
+            
+            document.getElementById('userName').textContent = user.name || 'N/A';
+            document.getElementById('userEmail').textContent = user.email || 'N/A';
+            document.getElementById('userPhone').textContent = user.phone || 'N/A';
+
+            // Bill Details
+            const billDetailsDiv = document.getElementById('billDetails');
+            let billHtml = '';
+            
+            if (data.service) {
+                billHtml += `<div class="detail-row">
+                    <span class="detail-label">Service:</span>
+                    <span class="detail-value">${data.service}</span>
+                </div>`;
+            }
+            
+            if (data.provider) {
+                billHtml += `<div class="detail-row">
+                    <span class="detail-label">Provider:</span>
+                    <span class="detail-value">${data.provider}</span>
+                </div>`;
+            }
+            
+            if (data.consumerNumber) {
+                billHtml += `<div class="detail-row">
+                    <span class="detail-label">Consumer Number:</span>
+                    <span class="detail-value">${data.consumerNumber}</span>
+                </div>`;
+            }
+            
+            if (data.connectionId) {
+                billHtml += `<div class="detail-row">
+                    <span class="detail-label">Connection ID:</span>
+                    <span class="detail-value">${data.connectionId}</span>
+                </div>`;
+            }
+            
+            if (data.customerId) {
+                billHtml += `<div class="detail-row">
+                    <span class="detail-label">Customer ID:</span>
+                    <span class="detail-value">${data.customerId}</span>
+                </div>`;
+            }
+            
+            if (data.billNumber) {
+                billHtml += `<div class="detail-row">
+                    <span class="detail-label">Bill Number:</span>
+                    <span class="detail-value">${data.billNumber}</span>
+                </div>`;
+            }
+            
+            if (data.mobile) {
+                billHtml += `<div class="detail-row">
+                    <span class="detail-label">Mobile Number:</span>
+                    <span class="detail-value">${data.mobile}</span>
+                </div>`;
+            }
+            
+            if (data.operator) {
+                billHtml += `<div class="detail-row">
+                    <span class="detail-label">Operator:</span>
+                    <span class="detail-value">${data.operator}</span>
+                </div>`;
+            }
+            
+            if (data.planAmount) {
+                billHtml += `<div class="detail-row">
+                    <span class="detail-label">Plan Amount:</span>
+                    <span class="detail-value">₹${data.planAmount}</span>
+                </div>`;
+            }
+            
+            if (data.billingPeriod) {
+                billHtml += `<div class="detail-row">
+                    <span class="detail-label">Billing Period:</span>
+                    <span class="detail-value">${data.billingPeriod}</span>
+                </div>`;
+            }
+
+            billDetailsDiv.innerHTML = billHtml;
+
+            // Payment Details
+            const methodNames = {
+                'card': 'Credit/Debit Card',
+                'upi': 'UPI',
+                'netbanking': 'Net Banking',
+                'wallet': 'Digital Wallet'
+            };
+            document.getElementById('paymentMethod').textContent = methodNames[data.paymentMethod] || data.paymentMethod;
+            document.getElementById('paymentDate').textContent = data.paymentDate || new Date().toLocaleString();
+
+            // Amount Summary
+            const amountSummaryDiv = document.getElementById('amountSummary');
+            let amountHtml = '';
+            
+            if (data.planAmount) {
+                amountHtml += `<div class="detail-row">
+                    <span class="detail-label">Plan Amount:</span>
+                    <span class="detail-value">₹${data.planAmount}</span>
+                </div>`;
+            }
+            
+            if (data.convenienceFee) {
+                amountHtml += `<div class="detail-row">
+                    <span class="detail-label">Convenience Fee:</span>
+                    <span class="detail-value">₹${data.convenienceFee}</span>
+                </div>`;
+            }
+            
+            if (data.processingFee) {
+                amountHtml += `<div class="detail-row">
+                    <span class="detail-label">Processing Fee:</span>
+                    <span class="detail-value">₹${data.processingFee}</span>
+                </div>`;
+            }
+            
+            if (data.serviceCharge) {
+                amountHtml += `<div class="detail-row">
+                    <span class="detail-label">Service Charge:</span>
+                    <span class="detail-value">₹${data.serviceCharge}</span>
+                </div>`;
+            }
+
+            amountSummaryDiv.innerHTML = amountHtml;
+            document.getElementById('totalAmount').textContent = `₹${data.totalAmount}`;
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
+
